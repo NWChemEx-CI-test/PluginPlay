@@ -16,6 +16,6 @@ jobs:
       ninja_build: true
       test: true
       install: false
-    secrets:
-      CMAIZE_GITHUB_TOKEN: ${{ secrets.CMAIZE_GITHUB_TOKEN }}
-      DOCKER_PAT: {{ secrets.DOCKER_PAT }}
+    secrets: inherit
+            #CMAIZE_GITHUB_TOKEN: ${{ secrets.CMAIZE_GITHUB_TOKEN }}
+            #DOCKER_PAT: {{ secrets.DOCKER_PAT }}
