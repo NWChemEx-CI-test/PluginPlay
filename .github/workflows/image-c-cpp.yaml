@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-with-gcc:
-    uses: NWChemEx-CI-test/.github/.github/workflows/c-cpp_tmpl.yaml@master
+    uses: NWChemEx-CI-test/.github/.github/workflows/image-c-cpp_tmpl.yaml@master
     with: 
       repo: PluginPlay
       clang-build: false
