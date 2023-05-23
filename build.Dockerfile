@@ -10,9 +10,9 @@ RUN    apt-get update \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /PluginPlay
+WORKDIR /
 
-COPY --from=0 /install /PluginPlay/install
+COPY --from=0 /install /install
 
 ARG libfort_version=0.4.2
 
