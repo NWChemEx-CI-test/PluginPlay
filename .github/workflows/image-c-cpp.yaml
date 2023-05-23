@@ -14,7 +14,7 @@ jobs:
       clang-build: false
       gcc-build: true
       ninja_build: true
-      test: false
+      test: true
       install: true
     secrets: inherit
             #CMAIZE_GITHUB_TOKEN: ${{ secrets.CMAIZE_GITHUB_TOKEN }}
