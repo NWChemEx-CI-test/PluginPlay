@@ -1,3 +1,3 @@
 FROM ubuntu:20.04
 WORKDIR /
-ADD /install /install
+ADD ../install /install
