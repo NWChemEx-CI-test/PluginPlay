@@ -1,5 +1,7 @@
 FROM ghcr.io/yzhang-23/release_parallelzone:v1
 
+FROM ghcr.io/yzhang-23/release_utilities:v1
+
 FROM ghcr.io/yzhang-23/build_parallelzone:v1
 LABEL maintainer="NWChemEx-Project" \
       description="Basic building environment for PluginPlay based on the ubuntu 20.04 image."
@@ -13,6 +15,8 @@ RUN    apt-get update \
 WORKDIR /
 
 COPY --from=0 /install /install
+
+COPY --from=1 /install /install
 
 ARG libfort_version=0.4.2
 
