@@ -31,7 +31,7 @@ set(
 include(get_cmaize)
 
 ### Options ###
-option(BUILD_TESTING "Should we build the tests?" OFF)
+option(BUILD_TESTING "Should we build the tests?" ON)
 option(BUILD_PYBINDINGS "Should we build Python3 bindings?" ON)
 option(BUILD_ROCKSDB "Should we build the RocksDB backend?" OFF)
 
@@ -110,7 +110,8 @@ cppyy_make_python_package(
 )
 
 if("${BUILD_TESTING}")
-    set(tests_src_dir "${CMAKE_CURRENT_LIST_DIR}/tests/${PROJECT_NAME}")
+	#set(tests_src_dir "${CMAKE_CURRENT_LIST_DIR}/tests/${PROJECT_NAME}")
+    set(tests_src_dir "${CMAKE_CURRENT_LIST_DIR}/tests")
     set(examples_src_dir "${CMAKE_CURRENT_LIST_DIR}/tests/${PROJECT_NAME}/docs")
     cmaize_add_library(
         ${PROJECT_NAME}_examples
@@ -132,7 +133,13 @@ if("${BUILD_TESTING}")
     )
     cmaize_add_tests(
         test_${PROJECT_NAME}
-        SOURCE_DIR ${tests_src_dir}
+        SOURCE_DIR "${tests_src_dir}/unit_${PROJECT_NAME}"
+        INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/src/${PROJECT_NAME}"
+        DEPENDS Catch2 ${PROJECT_NAME}_examples
+    )
+    cmaize_add_tests(
+        test_integration_${PROJECT_NAME}
+        SOURCE_DIR "${tests_src_dir}/integration_${PROJECT_NAME}"
         INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/src/${PROJECT_NAME}"
         DEPENDS Catch2 ${PROJECT_NAME}_examples
     )

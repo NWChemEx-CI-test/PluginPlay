@@ -1,10 +1,9 @@
-name: C_C++_CI with docker image
+name: C_C++_CI with dev
 
 on:
-        #########pull_request:
-  push:
+  pull_request:
     branches:
-      - master
+      - dev
 
 jobs:
   build-with-gcc:
@@ -15,7 +14,8 @@ jobs:
       gcc-build: true
       ninja_build: true
       test: true
-      install: true
+      integration_test: false
+      install: false
     secrets: inherit
             #CMAIZE_GITHUB_TOKEN: ${{ secrets.CMAIZE_GITHUB_TOKEN }}
             #DOCKER_PAT: {{ secrets.DOCKER_PAT }}
