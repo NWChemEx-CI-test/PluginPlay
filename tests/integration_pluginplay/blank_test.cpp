@@ -1,3 +1,5 @@
+#define CATCH_CONFIG_MAIN
+#include <iostream>
 #include <catch2/catch.hpp>
 
 int print_and_return(int ii) {

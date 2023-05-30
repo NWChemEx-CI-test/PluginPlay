@@ -112,7 +112,7 @@ cppyy_make_python_package(
 if("${BUILD_TESTING}")
 	#set(tests_src_dir "${CMAKE_CURRENT_LIST_DIR}/tests/${PROJECT_NAME}")
     set(tests_src_dir "${CMAKE_CURRENT_LIST_DIR}/tests")
-    set(examples_src_dir "${CMAKE_CURRENT_LIST_DIR}/tests/${PROJECT_NAME}/docs")
+    set(examples_src_dir "${CMAKE_CURRENT_LIST_DIR}/tests/unit_${PROJECT_NAME}/docs")
     cmaize_add_library(
         ${PROJECT_NAME}_examples
         SOURCE_DIR ${examples_src_dir}
