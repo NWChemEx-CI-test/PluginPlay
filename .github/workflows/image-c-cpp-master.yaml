@@ -17,5 +17,5 @@ jobs:
       integration_test: true
       install: true
     secrets: inherit
-            #CMAIZE_GITHUB_TOKEN: ${{ secrets.CMAIZE_GITHUB_TOKEN }}
+    ###CMAIZE_GITHUB_TOKEN: ${{ secrets.CMAIZE_GITHUB_TOKEN }}
             #DOCKER_PAT: {{ secrets.DOCKER_PAT }}
