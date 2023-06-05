@@ -1,7 +1,7 @@
 name: Test of receiving a repo dispatch
 on:
   repository_dispatch:
-    types: [utilities_release_update, parallelzone_release_update]
+    types: release_update
 
 jobs:
   repo_dispatch_test:
@@ -9,4 +9,4 @@ jobs:
     steps:
       - name: Receive a repo dispatch
         run: |
-             echo "Dispatch from the Utilities repo received!"
+             echo "Release dispatch from a dependent repo received!"
