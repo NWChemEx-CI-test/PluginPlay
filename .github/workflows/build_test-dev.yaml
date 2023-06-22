@@ -44,15 +44,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       bi_check: ${{ steps.building-image-update.outputs.tag }}
-    - name: Check if the building image has been updated
-      id: building-image-update
-      run: |
-        if [[ ${{ needs.docker-file-changes.outputs.build_dockfile == 'true' }} ]]; then
-           tag="test"
-        else
-           tag="stable"
-        fi
-        echo "$tag" >> "$GITHUB_OUTPUT"
+    steps:
+      - name: Check if the building image has been updated
+        id: building-image-update
+        run: |
+          if [[ ${{ needs.docker-file-changes.outputs.build_dockfile == 'true' }} ]]; then
+             tag="test"
+          else
+             tag="stable"
+          fi
+          echo "$tag" >> "$GITHUB_OUTPUT"
 
   build:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test_dev_tmpl.yaml@master
