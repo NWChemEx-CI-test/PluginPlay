@@ -34,11 +34,12 @@ jobs:
       matrix:
         repos: [Utilities]
     if: ${{ needs.docker-file-changes.outputs.build_dockfile == 'true' }}
-    uses: NWChemEx-CI-test/.github/actions/repo_dispatch@master
-    with:
-      to_repo: ${{ matrix.repos }}
-      type: build_update
-      DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
+    steps:
+      uses: NWChemEx-CI-test/.github/actions/repo_dispatch@master
+      with:
+        to_repo: ${{ matrix.repos }}
+        type: build_update
+        DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
 
   build_update_check:
     runs-on: ubuntu-latest
