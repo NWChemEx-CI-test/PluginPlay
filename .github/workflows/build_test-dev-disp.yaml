@@ -16,9 +16,9 @@ jobs:
         run: |
           i_repo = ${{ github.event.client_payload.initial_repo }}
           export i_repo = ${i_repo,,}
-          echo "::set-env name=i_repo::${i_repo}"
+          echo "::set-env repo_name=i_repo::${i_repo}"
       - name: Utilities updated
-        if: ${{ i_repo == utilities }}
+        if: ${{ repo_name == utilities }}
         run: |
           docker pull ghcr.io/nwchemex-ci-test/build_pluginplay:stable
           docker build -t ghcr.io/nwchemex-ci-test/build_pluginplay:test \
@@ -27,7 +27,7 @@ jobs:
           --build-arg utilities_rtag=test --build-arg parallelzone_btag=stable
           docker push ghcr.io/nwchemex-ci-test/build_${filename}:test
       - name: ParallelZone updated
-        if: ${{ i_repo == parallelzone }}
+        if: ${{ repo_repo == parallelzone }}
         run: |
           docker pull ghcr.io/nwchemex-ci-test/build_pluginplay:stable
           docker build -t ghcr.io/nwchemex-ci-test/build_pluginplay:test \
