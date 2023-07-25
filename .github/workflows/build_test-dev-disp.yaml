@@ -38,7 +38,7 @@ jobs:
           --build-arg utilities_rtag=test --build-arg parallelzone_btag=test
           docker push ghcr.io/nwchemex-ci-test/build_${filename}:test
 
-  build:
+  build-with-gcc:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test-dev_tmpl.yaml@master
     with: 
       repo: PluginPlay
@@ -53,9 +53,46 @@ jobs:
     #CMAIZE_GITHUB_TOKEN: ${{ secrets.CMAIZE_GITHUB_TOKEN }}
     #DOCKER_PAT: {{ secrets.DOCKER_PAT }}
 
-  merge:
+  merge-pr-to-dev:
+    runs-on: ubuntu-latest
+    needs: build-with-gcc
+    if: always() && (needs.build-with-gcc.result == 'success')
     steps:
       - name: merge pr to dev
-        uses: pascalgn/automerge-action@v0.15.6
+        uses: "pascalgn/automerge-action@v0.15.6"
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" 
+          GITHUB_TOKEN: "${{ secrets.DOCKER_PAT }}"
+          MERGE_LABELS: ""
+
+  Integration_test:
+    uses: NWChemEx-CI-test/.github/.github/workflows/build_test-dev_tmpl.yaml@master
+    needs: merge-pr-to-dev
+    if: always() && (needs.merge-pr-to-dev.result == 'success')
+    with:
+      repo: PluginPlay
+      clang-build: false
+      gcc-build: true
+      ninja_build: true
+      test: true
+      integration_test: true
+      install: true
+      build_image_tag: test
+      ref: dev
+    secrets: inherit
+
+# Update other repos
+  Update-repo_dispatch:
+    needs: Integration_test
+    if: always() && (needs.Integration_test.result == 'success')
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repos: [SimDE]
+    steps:
+      - uses: NWChemEx-CI-test/.github/actions/repo_dispatch@master
+        with:
+          to_repo: ${{ matrix.repos }}
+          type: build_update
+          DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
+          from_repo: PluginPlay
+          initial_repo: PluginPlay
