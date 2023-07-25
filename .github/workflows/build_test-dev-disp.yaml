@@ -54,21 +54,21 @@ jobs:
     #CMAIZE_GITHUB_TOKEN: ${{ secrets.CMAIZE_GITHUB_TOKEN }}
     #DOCKER_PAT: {{ secrets.DOCKER_PAT }}
 
-  merge-pr-to-dev:
-    runs-on: ubuntu-latest
-    needs: build-with-gcc
-    if: always() && (needs.build-with-gcc.result == 'success')
-    steps:
-      - name: merge pr to dev
-        uses: "pascalgn/automerge-action@v0.15.6"
-        env:
-          GITHUB_TOKEN: "${{ secrets.DOCKER_PAT }}"
-          MERGE_LABELS: ""
+    #merge-pr-to-dev:
+    #  runs-on: ubuntu-latest
+    #  needs: build-with-gcc
+    #  if: always() && (needs.build-with-gcc.result == 'success')
+    #  steps:
+    #    - name: merge pr to dev
+    #      uses: "pascalgn/automerge-action@v0.15.6"
+    #      env:
+    #        GITHUB_TOKEN: "${{ secrets.DOCKER_PAT }}"
+    #        MERGE_LABELS: ""
 
   Integration_test:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test-dev_tmpl.yaml@master
-    needs: merge-pr-to-dev
-    if: always() && (needs.merge-pr-to-dev.result == 'success')
+    needs: build-with-gcc
+    if: always() && (needs.build-with-gcc.result == 'success')
     with:
       repo: PluginPlay
       clang-build: false
