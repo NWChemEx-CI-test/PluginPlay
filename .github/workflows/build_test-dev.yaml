@@ -39,7 +39,7 @@ jobs:
           --cache-from ghcr.io/nwchemex-ci-test/build_pluginplay:stable \
           -f build.Dockerfile . --build-arg parallelzone_rtag=stable \
           --build-arg utilities_rtag=stable --build-arg parallelzone_btag=stable
-          docker push ghcr.io/nwchemex-ci-test/build_${filename}:test
+          docker push ghcr.io/nwchemex-ci-test/build_pluginplay:test
 
   build_update_check:
     runs-on: ubuntu-latest
