@@ -8,7 +8,7 @@ FROM ghcr.io/nwchemex-ci-test/release_utilities:$utilities_rtag
 
 FROM ghcr.io/nwchemex-ci-test/build_parallelzone:$parallelzone_btag
 
-# CI testing trigger
+# CI testing trigger ##
 
 LABEL maintainer="NWChemEx-Project" \
       description="Basic building environment for PluginPlay based on the ubuntu 20.04 image."
