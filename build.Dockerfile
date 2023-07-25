@@ -2,11 +2,11 @@ ARG parallelzone_rtag
 ARG utilities_rtag
 ARG parallelzone_btag
 
-FROM ghcr.io/yzhang-23/release_parallelzone:$parallelzone_rtag
+FROM ghcr.io/nwchemex-ci-test/release_parallelzone:$parallelzone_rtag
 
-FROM ghcr.io/yzhang-23/release_utilities:$utilities_rtag
+FROM ghcr.io/nwchemex-ci-test/release_utilities:$utilities_rtag
 
-FROM ghcr.io/yzhang-23/build_parallelzone:$parallelzone_btag
+FROM ghcr.io/nwchemex-ci-test/build_parallelzone:$parallelzone_btag
 
 LABEL maintainer="NWChemEx-Project" \
       description="Basic building environment for PluginPlay based on the ubuntu 20.04 image."
