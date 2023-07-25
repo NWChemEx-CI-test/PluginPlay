@@ -37,7 +37,7 @@ jobs:
           docker push ghcr.io/nwchemex-ci-test/build_${filename}:test
 
   build:
-    uses: NWChemEx-CI-test/.github/.github/workflows/build_test_dev_tmpl.yaml@master
+    uses: NWChemEx-CI-test/.github/.github/workflows/build_test-dev_tmpl.yaml@master
     with: 
       repo: PluginPlay
       clang-build: false

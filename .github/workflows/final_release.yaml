@@ -22,20 +22,12 @@ jobs:
         with:
           name: 'update-artifact'
       - name: create the artifact if it does not exist
-        if: ${{ steps.check_update_artifact.outputs.exists == false }}
+        if: ${{ steps.check_update_artifact.outputs.exists == 'false' }}
         run: |
-                # End repos for all
-                #echo "scfgradient_updated=false" > update_record.dat
-                #echo "nux_updated=false" >> update_record.dat
-                #echo "casscf_updated=false" >> update_record.dat
-                #echo "friendzone_updated=false" >> update_record.dat
-                #echo "mp2_updated=false" >> update_record.dat
-                #echo "nwpw_updated=false" >> update_record.dat
-                #echo "nwxelsi_updated=false" >> update_record.dat
           # End repos for test now
           echo "simde_updated=false" > update_record.dat
       - name: upload the created artifact
-        if: ${{ steps.check_update_artifact.outputs.exists == false }}
+        if: ${{ steps.check_update_artifact.outputs.exists == 'false' }}
         uses: actions/upload-artifact@v3
         with:
           name: update-artifact
