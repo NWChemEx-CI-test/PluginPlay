@@ -1,0 +1,13 @@
+name: Test receiving client_payload
+on:
+  repository_dispatch:
+    types: build_update
+
+jobs:
+  client_payload_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Receive a repo dispatch
+        run: |
+          echo "Dispatch from repo:  ${{ github.event.client_payload.from_repo }}"
+          echo "Changes initialized from repo:  ${{ github.event.client_payload.initial_repo }}"
