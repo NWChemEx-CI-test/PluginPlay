@@ -55,7 +55,7 @@ jobs:
           else
              tag="stable"
           fi
-          echo "$tag" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
   build-with-gcc:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test-dev_tmpl.yaml@master
