@@ -15,8 +15,8 @@ jobs:
       - name: Get the initial repo name in lowcase
         id: irepo
         run: |
-          i_repo = ${{ github.event.client_payload.initial_repo }}
-          export i_repo = ${i_repo,,}
+          i_repo=${{ github.event.client_payload.initial_repo }}
+          i_repo=${i_repo,,}
           #echo "::set-env repo_name=i_repo::${i_repo}"
           echo "i_repo=${i_repo}" >> $GITHUB_OUTPUT
       - name: Utilities updated
@@ -40,6 +40,7 @@ jobs:
 
   build-with-gcc:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test-dev_tmpl.yaml@master
+    needs: update-building-image
     with: 
       repo: PluginPlay
       clang-build: false
