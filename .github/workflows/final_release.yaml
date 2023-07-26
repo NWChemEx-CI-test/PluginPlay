@@ -80,14 +80,14 @@ jobs:
           type: now
           from_branch: dev
           target_branch: master
-          github_token: ${{ secrets.GITHUB_TOKEN }}     
+          github_token: ${{ secrets.DOCKER_PAT }}     
 
   Release:
     needs: [create_update_artifact, check_update_record]
     if: ${{ needs.check_update_record.outputs.all_updated == 'true' }}
     strategy:
       matrix:
-        repos: [SimDE]
+        repos: [PluginPlay]
           #[Utilities, TensorWrapper, PluginPlay, Chemist, SimDE,
           # SCF, Integrals, ChemCache, CASSCF, FriendZone, MP2,
           # NWPW, NWXELSI, SCFGradients, NWChemEX, NUX]
