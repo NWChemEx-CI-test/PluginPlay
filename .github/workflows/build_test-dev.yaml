@@ -24,6 +24,14 @@ jobs:
     needs: docker-file-changes
     if: ${{ needs.docker-file-changes.outputs.build_dockfile == 'true' }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_PAT }}
       - name: Update building image
         run: |
           docker pull ghcr.io/nwchemex-ci-test/build_pluginplay:stable
@@ -31,7 +39,7 @@ jobs:
           --cache-from ghcr.io/nwchemex-ci-test/build_pluginplay:stable \
           -f build.Dockerfile . --build-arg parallelzone_rtag=stable \
           --build-arg utilities_rtag=stable --build-arg parallelzone_btag=stable
-          docker push ghcr.io/nwchemex-ci-test/build_${filename}:test
+          docker push ghcr.io/nwchemex-ci-test/build_pluginplay:test
 
   build_update_check:
     runs-on: ubuntu-latest
@@ -47,10 +55,10 @@ jobs:
           else
              tag="stable"
           fi
-          echo "$tag" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
   build-with-gcc:
-    uses: NWChemEx-CI-test/.github/.github/workflows/build_test_dev_tmpl.yaml@master
+    uses: NWChemEx-CI-test/.github/.github/workflows/build_test-dev_tmpl.yaml@master
     needs: [update-building-image, build_update_check]
     with: 
       repo: PluginPlay
