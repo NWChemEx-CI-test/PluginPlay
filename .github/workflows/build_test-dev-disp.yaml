@@ -36,7 +36,7 @@ jobs:
           --cache-from ghcr.io/nwchemex-ci-test/build_pluginplay:stable \
           -f build.Dockerfile . --build-arg parallelzone_rtag=stable \
           --build-arg utilities_rtag=test --build-arg parallelzone_btag=stable
-          docker push ghcr.io/nwchemex-ci-test/build_${filename}:test
+          docker push ghcr.io/nwchemex-ci-test/build_pluginplay:test
       - name: ParallelZone updated
         if: ${{ steps.irepo.outputs.i_repo == 'parallelzone' }}
         run: |
@@ -45,7 +45,7 @@ jobs:
           --cache-from ghcr.io/nwchemex-ci-test/build_pluginplay:stable \
           -f build.Dockerfile . --build-arg parallelzone_rtag=test \
           --build-arg utilities_rtag=test --build-arg parallelzone_btag=test
-          docker push ghcr.io/nwchemex-ci-test/build_${filename}:test
+          docker push ghcr.io/nwchemex-ci-test/build_pluginplay:test
 
   build-with-gcc:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test-dev_tmpl.yaml@master
