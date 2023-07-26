@@ -1,0 +1,21 @@
+name: C_C++_CI with master
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-with-gcc:
+    uses: NWChemEx-CI-test/.github/.github/workflows/image-c-cpp_tmpl.yaml@master
+    with: 
+      repo: PluginPlay
+      clang-build: false
+      gcc-build: true
+      ninja_build: true
+      test: true
+      integration_test: true
+      install: true
+    secrets: inherit
+    ####CMAIZE_GITHUB_TOKEN: ${{ secrets.CMAIZE_GITHUB_TOKEN }}
+            #DOCKER_PAT: {{ secrets.DOCKER_PAT }}
