@@ -19,6 +19,15 @@ jobs:
           i_repo=${i_repo,,}
           #echo "::set-env repo_name=i_repo::${i_repo}"
           echo "i_repo=${i_repo}" >> $GITHUB_OUTPUT
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_PAT }}
+      # we may have a double updating issue here
       - name: Utilities updated
         if: ${{ steps.irepo.outputs.i_repo == 'utilities' }}
         run: |
