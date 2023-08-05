@@ -2,9 +2,6 @@ ARG btag
 
 FROM ghcr.io/nwchemex-ci-test/base_parallelzone:$btag
 
-LABEL maintainer="NWChemEx-Project" \
-      description="Basic building environment for PluginPlay based on the ubuntu 20.04 image."
-
 RUN    apt-get update \
         && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                 libboost-all-dev \
