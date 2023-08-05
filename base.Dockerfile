@@ -1,8 +1,7 @@
-FROM ghcr.io/yzhang-23/release_parallelzone:v1
+ARG btag
 
-FROM ghcr.io/yzhang-23/release_utilities:v1
+FROM ghcr.io/nwchemex-ci-test/base_parallelzone:$btag
 
-FROM ghcr.io/yzhang-23/build_parallelzone:v1
 LABEL maintainer="NWChemEx-Project" \
       description="Basic building environment for PluginPlay based on the ubuntu 20.04 image."
 
@@ -13,10 +12,6 @@ RUN    apt-get update \
         && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /
-
-COPY --from=0 /install /install
-
-COPY --from=1 /install /install
 
 ARG libfort_version=0.4.2
 
@@ -32,3 +27,7 @@ RUN wget --no-check-certificate --content-disposition https://codeload.github.co
     && rm -rf libfort-${libfort_version} libfort-${libfort_version}.tar.gz
 
 ENV PATH="`pwd`/install:${PATH}"
+
+LABEL maintainer="NWChemEx-Project" \
+      description="Basic building environment (without dependent repos) for PluginPlay based on the ParallelZone base image." \
+      libfort_version=${libfort_version}
