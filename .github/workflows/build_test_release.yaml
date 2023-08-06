@@ -62,10 +62,15 @@ jobs:
     needs: [update-base-image, build_update_check]
     if: always() && (needs.update-base-image.result == 'success' || needs.update-base-image.result == 'skipped')
     steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_PAT }}
       - uses: actions/checkout@v3
       - name: Build temporary building image for gcc
         run: |
-
           docker build -t ghcr.io/nwchemex-ci-test/building-image:gcc-tmp \
           -f build_tmp.Dockerfile . \
           --build-arg btag=${{needs.build_update_check.outputs.bi_check}} \
@@ -78,10 +83,15 @@ jobs:
     needs: [update-base-image, build_update_check]
     if: always() && (needs.update-base-image.result == 'success' || needs.update-base-image.result == 'skipped')
     steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_PAT }}
       - uses: actions/checkout@v3
       - name: Build temporary building image for clang
         run: |
-
           docker build -t ghcr.io/nwchemex-ci-test/building-image:clang-tmp \
           -f build_tmp.Dockerfile . \
           --build-arg btag=${{needs.build_update_check.outputs.bi_check}} \
