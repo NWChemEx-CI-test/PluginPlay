@@ -102,6 +102,7 @@ jobs:
   build-test-gcc:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
     needs: build-building-image-gcc
+    if: always() && (needs.build-building-image-gcc.result == 'success')
     with: 
       repo: PluginPlay
       clang-build: false
@@ -119,6 +120,7 @@ jobs:
   build-test-clang:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
     needs: build-building-image-clang
+    if: always() && (needs.build-building-image-clang.result == 'success')
     with:
       repo: PluginPlay
       clang-build: true
