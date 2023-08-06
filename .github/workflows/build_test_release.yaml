@@ -57,7 +57,7 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
   build-test-gcc:
-    uses: NWChemEx-CI-test/.github/.github/workflows/build_test-dev_tmpl.yaml@master
+    uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
     needs: [update-building-image, build_update_check]
     with: 
       repo: PluginPlay
