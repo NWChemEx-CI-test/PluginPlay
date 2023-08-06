@@ -2,8 +2,8 @@ ARG parallelzone_rtag
 ARG utilities_rtag
 ARG btag
 
-FROM ghcr.io/nwchemex-ci-test/release_parallelzone:$compiler
-FROM ghcr.io/nwchemex-ci-test/release_utilities:$compiler
+FROM ghcr.io/nwchemex-ci-test/release_parallelzone:$parallelzone_rtag
+FROM ghcr.io/nwchemex-ci-test/release_utilities:$utilities_rtag
 
 FROM ghcr.io/nwchemex-ci-test/base_pluginplay:$btag
 
