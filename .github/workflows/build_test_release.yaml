@@ -37,7 +37,7 @@ jobs:
           docker pull ghcr.io/nwchemex-ci-test/base_pluginplay:stable
           docker build -t ghcr.io/nwchemex-ci-test/base_pluginplay:test \
           --cache-from ghcr.io/nwchemex-ci-test/base_pluginplay:stable \
-          -f build.Dockerfile . --build-arg btag=stable
+          -f base.Dockerfile . --build-arg btag=stable
           docker push ghcr.io/nwchemex-ci-test/base_pluginplay:test
 
   build_update_check:
