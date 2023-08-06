@@ -19,7 +19,7 @@ jobs:
           bdfile:
             - 'base.Dockerfile'
 
-  update-building-image:
+  update-base-image:
     runs-on: ubuntu-latest
     needs: docker-file-changes
     if: ${{ needs.docker-file-changes.outputs.build_dockfile == 'true' }}
@@ -58,7 +58,7 @@ jobs:
 
   build-test-gcc:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
-    needs: [update-building-image, build_update_check]
+    needs: [update-base-image, build_update_check]
     with: 
       repo: PluginPlay
       clang-build: false
