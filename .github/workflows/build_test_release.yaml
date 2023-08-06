@@ -56,9 +56,53 @@ jobs:
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
+
+  build-building-image-gcc:
+    runs-on: ubuntu-latest
+    needs: [update-base-image, build_update_check]
+    if: always() && (needs.update-base-image.result == 'success' || needs.update-base-image.result == 'skipped')
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_PAT }}
+      - uses: actions/checkout@v3
+      - name: Build temporary building image for gcc
+        run: |
+          docker build -t ghcr.io/nwchemex-ci-test/building-image:gcc-tmp \
+          -f build_tmp.Dockerfile . \
+          --build-arg btag=${{needs.build_update_check.outputs.bi_check}} \
+          --build-arg parallelzone_rtag=gcc-stable \
+          --build-arg utilities_rtag=gcc-stable
+          docker push ghcr.io/nwchemex-ci-test/building-image:gcc-tmp
+
+  build-building-image-clang:
+    runs-on: ubuntu-latest
+    needs: [update-base-image, build_update_check]
+    if: always() && (needs.update-base-image.result == 'success' || needs.update-base-image.result == 'skipped')
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_PAT }}
+      - uses: actions/checkout@v3
+      - name: Build temporary building image for clang
+        run: |
+          docker build -t ghcr.io/nwchemex-ci-test/building-image:clang-tmp \
+          -f build_tmp.Dockerfile . \
+          --build-arg btag=${{needs.build_update_check.outputs.bi_check}} \
+          --build-arg parallelzone_rtag=clang-stable \
+          --build-arg utilities_rtag=clang-stable
+          docker push ghcr.io/nwchemex-ci-test/building-image:clang-tmp
+
   build-test-gcc:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
-    needs: [update-base-image, build_update_check]
+    needs: build-building-image-gcc
+    if: always() && (needs.build-building-image-gcc.result == 'success')
     with: 
       repo: PluginPlay
       clang-build: false
@@ -68,15 +112,15 @@ jobs:
       integration_test: false
       install: false
       base_image_tag: ${{ needs.build_update_check.outputs.bi_check }}
-      depend_repos: Utilities ParallelZone
+      #depend_repos: Utilities ParallelZone
     secrets: inherit 
     #CMAIZE_GITHUB_TOKEN: ${{ secrets.CMAIZE_GITHUB_TOKEN }}
     #DOCKER_PAT: {{ secrets.DOCKER_PAT }}
 
   build-test-clang:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
-    needs: [update-base-image, build_update_check]
-    if: always() && (needs.update-base-image.result == 'success' || needs.update-base-image.result == 'skipped')
+    needs: build-building-image-clang
+    if: always() && (needs.build-building-image-clang.result == 'success')
     with:
       repo: PluginPlay
       clang-build: true
@@ -86,7 +130,7 @@ jobs:
       integration_test: false
       install: false
       base_image_tag: ${{ needs.build_update_check.outputs.bi_check }}
-      depend_repos: Utilities ParallelZone
+      #depend_repos: Utilities ParallelZone
     secrets: inherit
 
   merge-pr-to-dev:
@@ -102,7 +146,7 @@ jobs:
 
   integration_test-gcc:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
-    needs: [merge-pr-to-dev, build_update_check]
+    needs: merge-pr-to-dev
     if: always() && (needs.merge-pr-to-dev.result == 'success')
     with:
       repo: PluginPlay
@@ -113,13 +157,13 @@ jobs:
       integration_test: true
       install: true
       base_image_tag: ${{ needs.build_update_check.outputs.bi_check }}
-      depend_repos: Utilities ParallelZone
+      #depend_repos: Utilities ParallelZone
       ref: dev
     secrets: inherit
 
   integration_test-clang:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
-    needs: [merge-pr-to-dev, build_update_check]
+    needs: merge-pr-to-dev
     if: always() && (needs.merge-pr-to-dev.result == 'success')
     with:
       repo: PluginPlay
@@ -130,7 +174,7 @@ jobs:
       integration_test: true
       install: true
       base_image_tag: ${{ needs.build_update_check.outputs.bi_check }}
-      depend_repos: Utilities ParallelZone
+      #depend_repos: Utilities ParallelZone
       ref: dev
     secrets: inherit
 
