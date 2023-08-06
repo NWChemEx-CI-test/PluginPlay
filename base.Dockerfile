@@ -2,7 +2,7 @@ ARG btag
 
 FROM ghcr.io/nwchemex-ci-test/base_parallelzone:$btag
 
-# CI testing trigger ###
+# CI testing trigger ####
 
 RUN    apt-get update \
         && DEBIAN_FRONTEND=noninteractive apt-get install -y \
