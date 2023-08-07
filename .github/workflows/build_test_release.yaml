@@ -190,4 +190,18 @@ jobs:
       #depend_repos: Utilities ParallelZone
       ref: dev
     secrets: inherit
-
+  
+  Merge:
+    runs-on: ubuntu-latest
+    needs: [integration_test-gcc, integration_test-clang]
+    if: always() && (needs.integration_test-gcc.result == 'success') && (needs.integration_test-clang.result == 'success')
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: merge dev to master
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          from_branch: dev
+          target_branch: master
+          github_token: ${{ secrets.GITHUB_TOKEN }}
