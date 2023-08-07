@@ -1,42 +1,31 @@
-# This workflows handles any updates in the source codes
-# and/or image dockerfiles.
-# The building image is built on-the-fly using the base
-# image and the stable versions of the release images
-# of the dependent repos.
-# In the end two new release images
-# ghcr.io/nwchemex-ci-test/release_plugin:gcc(clang)-latest
-# are generated. Whether these images are stable
-# (do not break any downstream repos) or not is still 
-# to be tested.
-# This workflow should run in the branch which opens a
-# PR to dev. 
+# This workflow updates the release image manually
+# If the parent base image has been updated, one 
+# should choose update_base_image=true, otherwise
+# update_base_image=false
+# In the end two new release images 
+# ghcr.io/nwchemex-ci-test/release_pluginplay:gcc(clang)-latest 
+# would be generated, but whether these images 
+# are stable (does not break any downstream repo) 
+# or not is still to be tested.
+# This workflow should run in master.
 
-
-name: Build test release
+name: Update release image
 
 on:
-  pull_request:
-    branches:
-      - dev
+  workflow_dispatch:
+    inputs:
+      update_base_image:
+        type: choice
+        description: update the base image or not
+        options: 
+        - true
+        - false
 
 jobs:
-  docker-file-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      build_dockfile: ${{ steps.changes.outputs.bdfile }}
-    steps:
-    - uses: actions/checkout@v3
-    - uses: dorny/paths-filter@v2
-      id: changes
-      with:
-        filters: |
-          bdfile:
-            - 'base.Dockerfile'
 
   update-base-image:
     runs-on: ubuntu-latest
-    needs: docker-file-changes
-    if: ${{ needs.docker-file-changes.outputs.build_dockfile == 'true' }}
+    if: ${{ inputs.update_base_image == true }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -54,25 +43,9 @@ jobs:
           -f base.Dockerfile . --build-arg btag=stable
           docker push ghcr.io/nwchemex-ci-test/base_pluginplay:test
 
-  build_update_check:
-    runs-on: ubuntu-latest
-    needs: docker-file-changes
-    outputs:
-      bi_check: ${{ steps.building-image-update.outputs.tag }}
-    steps:
-      - name: Check if the building image has been updated
-        id: building-image-update
-        run: |
-          if [[ ${{ needs.docker-file-changes.outputs.build_dockfile == 'true' }} ]]; then
-             tag="test"
-          else
-             tag="stable"
-          fi
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
   build-building-image-gcc:
     runs-on: ubuntu-latest
-    needs: [update-base-image, build_update_check]
+    needs: update-base-image
     if: always() && (needs.update-base-image.result == 'success' || needs.update-base-image.result == 'skipped')
     steps:
       - name: Login to GitHub Container Registry
@@ -82,13 +55,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.DOCKER_PAT }}
       - uses: actions/checkout@v3
-      - name: Build temporary building image for gcc
+      - name: Build temporary building image for gcc case I
+        if: ${{ inputs.update_base_image == true }}
         run: |
           docker build -t ghcr.io/nwchemex-ci-test/building-image:gcc-tmp \
           -f build_tmp.Dockerfile . \
-          --build-arg btag=${{needs.build_update_check.outputs.bi_check}} \
-          --build-arg parallelzone_rtag=gcc-stable \
-          --build-arg utilities_rtag=gcc-stable
+          --build-arg btag=test \
+          --build-arg parallelzone_rtag=gcc-latest \
+          --build-arg utilities_rtag=gcc-latest
+          docker push ghcr.io/nwchemex-ci-test/building-image:gcc-tmp
+      - name: Build temporary building image for gcc case II
+        if: ${{ inputs.update_base_image == false }}
+        run: |
+          docker build -t ghcr.io/nwchemex-ci-test/building-image:gcc-tmp \
+          -f build_tmp.Dockerfile . \
+          --build-arg btag=stable \
+          --build-arg parallelzone_rtag=gcc-latest \
+          --build-arg utilities_rtag=gcc-latest
           docker push ghcr.io/nwchemex-ci-test/building-image:gcc-tmp
 
   build-building-image-clang:
@@ -103,13 +86,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.DOCKER_PAT }}
       - uses: actions/checkout@v3
-      - name: Build temporary building image for clang
+      - name: Build temporary building image for clang case I
+        if: ${{ inputs.update_base_image == true }}
         run: |
           docker build -t ghcr.io/nwchemex-ci-test/building-image:clang-tmp \
           -f build_tmp.Dockerfile . \
-          --build-arg btag=${{needs.build_update_check.outputs.bi_check}} \
-          --build-arg parallelzone_rtag=clang-stable \
-          --build-arg utilities_rtag=clang-stable
+          --build-arg btag=test \
+          --build-arg parallelzone_rtag=clang-latest \
+          --build-arg utilities_rtag=clang-latest
+          docker push ghcr.io/nwchemex-ci-test/building-image:clang-tmp
+      - name: Build temporary building image for clang case II
+        if: ${{ inputs.update_base_image == false }}
+        run: |
+          docker build -t ghcr.io/nwchemex-ci-test/building-image:clang-tmp \
+          -f build_tmp.Dockerfile . \
+          --build-arg btag=stable \
+          --build-arg parallelzone_rtag=clang-latest \
+          --build-arg utilities_rtag=clang-latest
           docker push ghcr.io/nwchemex-ci-test/building-image:clang-tmp
 
   build-test-gcc:
@@ -125,7 +118,6 @@ jobs:
       integration_test: false
       install: false
       base_image_tag: ${{ needs.build_update_check.outputs.bi_check }}
-      #depend_repos: Utilities ParallelZone
     secrets: inherit 
     #CMAIZE_GITHUB_TOKEN: ${{ secrets.CMAIZE_GITHUB_TOKEN }}
     #DOCKER_PAT: {{ secrets.DOCKER_PAT }}
@@ -143,24 +135,12 @@ jobs:
       integration_test: false
       install: false
       base_image_tag: ${{ needs.build_update_check.outputs.bi_check }}
-      #depend_repos: Utilities ParallelZone
     secrets: inherit
-
-  merge-pr-to-dev:
-    runs-on: ubuntu-latest
-    needs: [build-test-gcc, build-test-clang]
-    if: always() && (needs.build-test-gcc.result == 'success') && (needs.build-test-clang.result == 'success')
-    steps:
-      - name: merge pr to dev
-        uses: "pascalgn/automerge-action@v0.15.6"
-        env:
-          GITHUB_TOKEN: "${{ secrets.DOCKER_PAT }}"
-          MERGE_LABELS: ""
 
   integration_test-gcc:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
-    needs: merge-pr-to-dev
-    if: always() && (needs.merge-pr-to-dev.result == 'success')
+    needs: build-test-gcc
+    if: always() && (needs.build-test-gcc.result == 'success')
     with:
       repo: PluginPlay
       clang-build: false
@@ -170,14 +150,13 @@ jobs:
       integration_test: true
       install: true
       base_image_tag: ${{ needs.build_update_check.outputs.bi_check }}
-      #depend_repos: Utilities ParallelZone
       ref: dev
     secrets: inherit
 
   integration_test-clang:
     uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
-    needs: merge-pr-to-dev
-    if: always() && (needs.merge-pr-to-dev.result == 'success')
+    needs: build-test-clang
+    if: always() && (needs.build-test-clang.result == 'success')
     with:
       repo: PluginPlay
       clang-build: true
@@ -187,7 +166,6 @@ jobs:
       integration_test: true
       install: true
       base_image_tag: ${{ needs.build_update_check.outputs.bi_check }}
-      #depend_repos: Utilities ParallelZone
       ref: dev
     secrets: inherit
 
