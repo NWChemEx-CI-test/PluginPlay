@@ -1,17 +1,8 @@
-ARG parallelzone_rtag
-ARG utilities_rtag
-ARG parallelzone_btag
+ARG btag
 
-FROM ghcr.io/nwchemex-ci-test/release_parallelzone:$parallelzone_rtag
+FROM ghcr.io/nwchemex-ci-test/base_parallelzone:$btag
 
-FROM ghcr.io/nwchemex-ci-test/release_utilities:$utilities_rtag
-
-FROM ghcr.io/nwchemex-ci-test/build_parallelzone:$parallelzone_btag
-
-# CI testing trigger ##
-
-LABEL maintainer="NWChemEx-Project" \
-      description="Basic building environment for PluginPlay based on the ubuntu 20.04 image."
+# CI testing trigger #####
 
 RUN    apt-get update \
         && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -20,10 +11,6 @@ RUN    apt-get update \
         && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /
-
-COPY --from=0 /install /install
-
-COPY --from=1 /install /install
 
 ARG libfort_version=0.4.2
 
@@ -39,3 +26,7 @@ RUN wget --no-check-certificate --content-disposition https://codeload.github.co
     && rm -rf libfort-${libfort_version} libfort-${libfort_version}.tar.gz
 
 ENV PATH="`pwd`/install:${PATH}"
+
+LABEL maintainer="NWChemEx-Project" \
+      description="Basic building environment (without dependent repos) for PluginPlay based on the ParallelZone base image." \
+      libfort_version=${libfort_version}

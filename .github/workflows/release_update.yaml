@@ -1,0 +1,171 @@
+# This workflow updates the release image manually
+# If the parent base image has been updated, one 
+# should choose update_base_image=true, otherwise
+# update_base_image=false
+# In the end two new release images 
+# ghcr.io/nwchemex-ci-test/release_pluginplay:gcc(clang)-latest 
+# would be generated, but whether these images 
+# are stable (does not break any downstream repo) 
+# or not is still to be tested.
+# This workflow should run in master.
+
+name: Update release image
+
+on:
+  workflow_dispatch:
+    inputs:
+      update_base_image:
+        type: choice
+        description: update the base image or not
+        options: 
+        - true
+        - false
+
+jobs:
+
+  update-base-image:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.update_base_image == true }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_PAT }}
+      - name: Update base image
+        run: |
+          docker pull ghcr.io/nwchemex-ci-test/base_pluginplay:stable
+          docker build -t ghcr.io/nwchemex-ci-test/base_pluginplay:test \
+          --cache-from ghcr.io/nwchemex-ci-test/base_pluginplay:stable \
+          -f base.Dockerfile . --build-arg btag=stable
+          docker push ghcr.io/nwchemex-ci-test/base_pluginplay:test
+
+  build-building-image-gcc:
+    runs-on: ubuntu-latest
+    needs: update-base-image
+    if: always() && (needs.update-base-image.result == 'success' || needs.update-base-image.result == 'skipped')
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_PAT }}
+      - uses: actions/checkout@v3
+      - name: Build temporary building image for gcc case I
+        if: ${{ inputs.update_base_image == true }}
+        run: |
+          docker build -t ghcr.io/nwchemex-ci-test/building-image:gcc-tmp \
+          -f build_tmp.Dockerfile . \
+          --build-arg btag=test \
+          --build-arg parallelzone_rtag=gcc-latest \
+          --build-arg utilities_rtag=gcc-latest
+          docker push ghcr.io/nwchemex-ci-test/building-image:gcc-tmp
+      - name: Build temporary building image for gcc case II
+        if: ${{ inputs.update_base_image == false }}
+        run: |
+          docker build -t ghcr.io/nwchemex-ci-test/building-image:gcc-tmp \
+          -f build_tmp.Dockerfile . \
+          --build-arg btag=stable \
+          --build-arg parallelzone_rtag=gcc-latest \
+          --build-arg utilities_rtag=gcc-latest
+          docker push ghcr.io/nwchemex-ci-test/building-image:gcc-tmp
+
+  build-building-image-clang:
+    runs-on: ubuntu-latest
+    needs: [update-base-image, build_update_check]
+    if: always() && (needs.update-base-image.result == 'success' || needs.update-base-image.result == 'skipped')
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_PAT }}
+      - uses: actions/checkout@v3
+      - name: Build temporary building image for clang case I
+        if: ${{ inputs.update_base_image == true }}
+        run: |
+          docker build -t ghcr.io/nwchemex-ci-test/building-image:clang-tmp \
+          -f build_tmp.Dockerfile . \
+          --build-arg btag=test \
+          --build-arg parallelzone_rtag=clang-latest \
+          --build-arg utilities_rtag=clang-latest
+          docker push ghcr.io/nwchemex-ci-test/building-image:clang-tmp
+      - name: Build temporary building image for clang case II
+        if: ${{ inputs.update_base_image == false }}
+        run: |
+          docker build -t ghcr.io/nwchemex-ci-test/building-image:clang-tmp \
+          -f build_tmp.Dockerfile . \
+          --build-arg btag=stable \
+          --build-arg parallelzone_rtag=clang-latest \
+          --build-arg utilities_rtag=clang-latest
+          docker push ghcr.io/nwchemex-ci-test/building-image:clang-tmp
+
+  build-test-gcc:
+    uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
+    needs: build-building-image-gcc
+    if: always() && (needs.build-building-image-gcc.result == 'success')
+    with: 
+      repo: PluginPlay
+      clang-build: false
+      gcc-build: true
+      ninja_build: true
+      test: true
+      integration_test: false
+      install: false
+      base_image_tag: ${{ needs.build_update_check.outputs.bi_check }}
+    secrets: inherit 
+    #CMAIZE_GITHUB_TOKEN: ${{ secrets.CMAIZE_GITHUB_TOKEN }}
+    #DOCKER_PAT: {{ secrets.DOCKER_PAT }}
+
+  build-test-clang:
+    uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
+    needs: build-building-image-clang
+    if: always() && (needs.build-building-image-clang.result == 'success')
+    with:
+      repo: PluginPlay
+      clang-build: true
+      gcc-build: false
+      ninja_build: true
+      test: true
+      integration_test: false
+      install: false
+      base_image_tag: ${{ needs.build_update_check.outputs.bi_check }}
+    secrets: inherit
+
+  integration_test-gcc:
+    uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
+    needs: build-test-gcc
+    if: always() && (needs.build-test-gcc.result == 'success')
+    with:
+      repo: PluginPlay
+      clang-build: false
+      gcc-build: true
+      ninja_build: true
+      test: true
+      integration_test: true
+      install: true
+      base_image_tag: ${{ needs.build_update_check.outputs.bi_check }}
+      ref: dev
+    secrets: inherit
+
+  integration_test-clang:
+    uses: NWChemEx-CI-test/.github/.github/workflows/build_test_release_tmpl.yaml@master
+    needs: build-test-clang
+    if: always() && (needs.build-test-clang.result == 'success')
+    with:
+      repo: PluginPlay
+      clang-build: true
+      gcc-build: false
+      ninja_build: true
+      test: true
+      integration_test: true
+      install: true
+      base_image_tag: ${{ needs.build_update_check.outputs.bi_check }}
+      ref: dev
+    secrets: inherit
+
