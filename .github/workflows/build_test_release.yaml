@@ -204,4 +204,4 @@ jobs:
           type: now
           from_branch: dev
           target_branch: master
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.DOCKER_PAT }}
